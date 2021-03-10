@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
+var moment = require( 'moment' );
 var opts = {
     domain:'Domain-A',
     logDirectory: __dirname + '/../logs',
     fileNamePattern: 'hourly-test-<date>.log',
-    dateFormat:'YYYY.MM.DD-HH'
+    formatDate(ts) {
+        return moment(ts).format('YYYY.MM.DD-HH');
+    },
 };
 
 var log = require('../lib/SimpleLogger').createRollingFileLogger( opts );

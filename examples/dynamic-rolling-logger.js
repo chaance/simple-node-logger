@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+var moment = require( 'moment' );
 var port = 18034;
 
 // confirure to read the config file each 2 minutes...
@@ -7,7 +8,9 @@ var port = 18034;
 var opts = {
     logDirectory: __dirname + '/../logs',
     fileNamePattern: 'dynamic-<date>.log',
-    dateFormat:'YYYY.MM.DD-a',
+    formatDate(ts) {
+        return moment(ts).format('YYYY.MM.DD-a');
+    },
     domain:'MyApplication-' + port,
     level:'info',
     loggerConfigFile: __dirname + '/logger-config.json',
@@ -29,7 +32,7 @@ var appender = log.getAppenders()[0];
 console.log('write to file: ', appender.__protected().currentFile );
 
 // rolling file writer uses interval, so we need to exit 
-let count = 5
+let count = 5;
 setInterval(function() {
     log.trace('trace time: ', new Date().toJSON());
     log.debug('debug time: ', new Date().toJSON());

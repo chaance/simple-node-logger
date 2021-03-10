@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
+var moment = require( 'moment' );
 var opts = {
     logDirectory: __dirname + '/../logs',
     fileNamePattern: 'apptest-<date>.log',
-    dateFormat:'YYYY.MM.DD-HHa'
+    formatDate(ts) {
+        return moment(ts).format('YYYY.MM.DD-HHa');
+    },
 };
 
 var log = require('../lib/SimpleLogger').createRollingFileLogger( opts );

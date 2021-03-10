@@ -70,17 +70,20 @@ describe('RollingFileAppender', function() {
             p.writers.length.should.equal( 1 );
         });
 
-        it('should check openWriter can optn a new files with filename passed in');
+        // TODO: it('should check openWriter can open a new files with filename passed in');
     });
 
     describe('checkForRoll', function() {
         var opts = createOptions();
+        var format = 'YYYY.MM.DD';
 
-        opts.dateFormat = 'YYYY.MM.DD';
+        opts.formatDate = function(ts) {
+            return moment(ts).format(format);
+        };
 
         it('should return false when the date stays within the same day', function() {
             var now = moment( '2014-01-01T00:00:00' ),
-                fn = opts.fileNamePattern.replace( /<DATE>/i, now.format( opts.dateFormat ) ),
+                fn = opts.fileNamePattern.replace( /<DATE>/i, now.format( format ) ),
                 appender;
 
             opts.currentFile = path.join( process.env.HOME, fn );
@@ -93,16 +96,16 @@ describe('RollingFileAppender', function() {
 
             // now add a second
             now = now.add( 1, 's' );
-            appender.checkForRoll( now ).should.equal( false );
+            appender.checkForRoll( now.valueOf() ).should.equal( false );
 
             // now add a few hours
             now = now.add( 4, 'h' );
-            appender.checkForRoll( now ).should.equal( false );
+            appender.checkForRoll( now.valueOf() ).should.equal( false );
         });
 
         it('should return true when the day changes', function() {
             var now = moment(),
-                fn = opts.fileNamePattern.replace( /<DATE>/i, now.format( opts.dateFormat ) ),
+                fn = opts.fileNamePattern.replace( /<DATE>/i, now.format( format ) ),
                 appender;
 
             opts.currentFile = path.join( process.env.HOME, fn );
@@ -113,14 +116,14 @@ describe('RollingFileAppender', function() {
 
             // now add a few hours
             now = now.add( 1, 'day' );
-            appender.checkForRoll( now ).should.equal( true );
+            appender.checkForRoll( now.valueOf() ).should.equal( true );
         });
 
     });
 
     describe('createFileName', function() {
         const opts = createOptions();
-        const now = moment( '2014-02-06T18:00Z' ).utc();
+        const now = new Date('2014-02-06T18:00Z'); // Thu Feb 06 2014 10:00:00 GMT-0800 (Pacific Standard Time)
         const patterns = [
             'YY.MM.DD',
             'YYYY.MM.DD.HH',
@@ -130,23 +133,23 @@ describe('RollingFileAppender', function() {
         ];
         const expected = [
             'app-14.02.06.log',
-            'app-2014.02.06.18.log',
-            'app-2014.02.06-pm.log',
+            'app-2014.02.06.10.log',
+            'app-2014.02.06-am.log',
             'app-20140206.log',
             'app-Feb-06.log'
         ];
 
         it('should create a filename based on known pattern and date', function() {
-            // TODO : refactor for forEach
             for (let idx = 0; idx < patterns.length; idx++) {
-                opts.dateFormat = patterns[ idx ];
+                opts.formatDate = function (ts) {
+                    let fmt = moment(ts).format( patterns[ idx ] );
+                    return fmt;
+                };
+                
                 const appender = new RollingFileAppender( opts );
-
                 const fn = appender.createFileName( now );
-
                 fn.should.equal( expected[ idx ] );
             }
         });
     });
-
 });

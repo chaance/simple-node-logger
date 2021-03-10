@@ -6,6 +6,7 @@
  */
 const should = require('chai').should();
 const dash = require( 'lodash' );
+const moment = require( 'moment' );
 const fs = require( 'fs' );
 const Logger = require('../lib/Logger' );
 const SimpleLogger = require( '../lib/SimpleLogger' );
@@ -210,7 +211,9 @@ describe('SimpleLogger', function() {
 
         it('should create a simple logger with a single console adapter when invoked with format options', function() {
             const opts = {
-                timestampFormat:'x' // unix timestamp
+                formatTimestamp(ts) {
+                    return moment(ts).format('x'); // unix timestamp
+                }
             };
             const log = SimpleLogger.createSimpleLogger( opts );
 

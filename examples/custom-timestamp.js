@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
-var opts = {
-        timestampFormat:'mm:ss.SSS'
+var moment = require( 'moment' ),
+    opts = {
+        formatTimestamp(ts) {
+            return moment( ts ).format( 'mm:ss.SSS' );
+        },
     },
     log = require('../lib/SimpleLogger').createSimpleLogger( opts );
 

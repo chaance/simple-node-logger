@@ -6,6 +6,7 @@
  */
 const should = require('chai').should(),
     dash = require( 'lodash' ),
+    moment = require('moment'),
     Logger = require('../lib/Logger' ),
     AbstractAppender = require('../lib/AbstractAppender');
 
@@ -112,7 +113,7 @@ describe('AbstractAppender', function() {
         });
     });
 
-    describe('#timestampFormat', function() {
+    describe('#formatTimestamp', function() {
         const ts = 1428516587697; // 2015-04-08T18:09:47.697Z
 
         it('should have the default format', function() {
@@ -132,7 +133,9 @@ describe('AbstractAppender', function() {
         it('should have a custom format from options', function() {
             const opts = {
                 typeName:'customerTSAppender',
-                timestampFormat:'x' // unix timestamp
+                formatTimestamp(ts) {
+                    return moment(ts).format('x'); // unix timestamp
+                },
             };
             const appender = new AbstractAppender( opts);
             const sdt = appender.formatTimestamp( ts );

@@ -5,7 +5,7 @@
 \ \| | '_ ` _ \| '_ \| |/ _ \  /  \/ / _ \ / _` |/ _ \  / /  / _ \ / _` |/ _` |/ _ \ '__|
 _\ \ | | | | | | |_) | |  __/ / /\  / (_) | (_| |  __/ / /__| (_) | (_| | (_| |  __/ |   
 \__/_|_| |_| |_| .__/|_|\___| \_\ \/ \___/ \__,_|\___| \____/\___/ \__, |\__, |\___|_|   
-               |_|                                                 |___/ |___/           
+			   |_|                                                 |___/ |___/           
 ```
 
 [![NPM version](https://badge.fury.io/js/simple-node-logger.svg)](http://badge.fury.io/js/simple-node-logger) [![Build Status](https://travis-ci.org/darrylwest/simple-node-logger.svg?branch=master)](https://travis-ci.org/darrylwest/simple-node-logger) [![Dependency Status](https://david-dm.org/darrylwest/simple-node-logger.svg)](https://david-dm.org/darrylwest/simple-node-logger)
@@ -44,9 +44,12 @@ or
 ```javascript
 // create a custom timestamp format for log statements
 const SimpleNodeLogger = require('simple-node-logger'),
+	moment = require( 'moment' ),
 	opts = {
-		logFilePath:'mylogfile.log',
-		timestampFormat:'YYYY-MM-DD HH:mm:ss.SSS'
+		logFilePath: 'mylogfile.log',
+		formatTimestamp(timestamp) {
+			return moment( timestamp ).format( 'YYYY-MM-DD HH:mm:ss.SSS' );
+		}
 	},
 log = SimpleNodeLogger.createSimpleLogger( opts );
 ```
@@ -62,11 +65,14 @@ or
 
 ```javascript
 // create a rolling file logger based on date/time that fires process events
-const opts = {
+const moment = require('moment'),
+    opts = {
 	errorEventName:'error',
-        logDirectory:'/mylogfiles', // NOTE: folder must exist and be writable...
-        fileNamePattern:'roll-<DATE>.log',
-        dateFormat:'YYYY.MM.DD'
+		logDirectory:'/mylogfiles', // NOTE: folder must exist and be writable...
+		fileNamePattern:'roll-<DATE>.log',
+        formatDate(timestamp) {
+            return moment( timestamp ).format( 'YYYY.MM.DD' );
+        },
 };
 const log = require('simple-node-logger').createRollingFileLogger( opts );
 ```
@@ -76,9 +82,9 @@ or
 ```javascript
 // create a log manager
 const manager = require('simple-node-logger').createLogManager();
-    
+	
 manager.createConsoleAppender();
-    
+	
 const log = manager.createLogger('MyClass');
 // create other logs and appenders...
 ```
@@ -176,24 +182,24 @@ Adding a new appender is as easy as implementing write( logEntry ).  The easiest
 For example, you can extend the AbstractAppender to create a JSON appender by doing this:
 
 ```javascript
-    const AbstractAppender = require('simple-node-logger').AbstractAppender;
+	const AbstractAppender = require('simple-node-logger').AbstractAppender;
 
-    const JSONAppender = function() {
-    	'use strict';
-    	var appender = this;
-    	
-        var opts = {
-            typeName:'JSONAppender'
-        };
-        
-        AbstractAppender.extend( this, opts );
-        
-        // format and write all entry/statements
-        this.write = function(entry) {
-        	var fields = appender.formatEntry( entry );
-        	
-        	process.stdout.write( JSON.stringify( entry ) + '\n' );
-        };
+	const JSONAppender = function() {
+		'use strict';
+		var appender = this;
+		
+		var opts = {
+			typeName:'JSONAppender'
+		};
+		
+		AbstractAppender.extend( this, opts );
+		
+		// format and write all entry/statements
+		this.write = function(entry) {
+			var fields = appender.formatEntry( entry );
+			
+			process.stdout.write( JSON.stringify( entry ) + '\n' );
+		};
     };
 ```
 
@@ -218,13 +224,13 @@ const socket = openWebSocket();
 
 // override the standard error method to send a socket message
 log.error = function() {
-    var args = Array.prototype.slice.call( arguments ),
-        entry = log.log('error', args);
+	var args = Array.prototype.slice.call( arguments ),
+		entry = log.log('error', args);
 
-    // now do something special with the log entry...
-    process.nextTick(function() {
-    	socket.send( JSON.stringify( entry ));
-    });
+	// now do something special with the log entry...
+	process.nextTick(function() {
+		socket.send( JSON.stringify( entry ));
+	});
 };
 ```
 
@@ -245,11 +251,11 @@ There is also a file watcher that can be invoked with this:
 Mocks used for testing include MockLogger and MockAppender.  Typically you would use MockLogger for unit tests like this:
 
 ```javascript
-    const MockLogger = require('simple-node-logger').mocks.MockLogger;
+	const MockLogger = require('simple-node-logger').mocks.MockLogger;
 
-    const log = MockLogger.createLogger('MyCategory');
+	const log = MockLogger.createLogger('MyCategory');
 
-    log.info('this is a log statement');
+	log.info('this is a log statement');
     log.getLogEntries().length.should.equal( 1 );
 ```
 
