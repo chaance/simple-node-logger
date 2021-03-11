@@ -123,7 +123,7 @@ describe('RollingFileAppender', function() {
 
     describe('createFileName', function() {
         const opts = createOptions();
-        const now = new Date('2014-02-06T18:00Z'); // Thu Feb 06 2014 10:00:00 GMT-0800 (Pacific Standard Time)
+        const now = new Date(1391709600000); // Thu Feb 06 2014 10:00:00 GMT-0800
         const patterns = [
             'YY.MM.DD',
             'YYYY.MM.DD.HH',
@@ -133,8 +133,8 @@ describe('RollingFileAppender', function() {
         ];
         const expected = [
             'app-14.02.06.log',
-            'app-2014.02.06.10.log',
-            'app-2014.02.06-am.log',
+            'app-2014.02.06.18.log',
+            'app-2014.02.06-pm.log',
             'app-20140206.log',
             'app-Feb-06.log'
         ];
@@ -142,7 +142,7 @@ describe('RollingFileAppender', function() {
         it('should create a filename based on known pattern and date', function() {
             for (let idx = 0; idx < patterns.length; idx++) {
                 opts.formatDate = function (ts) {
-                    let fmt = moment(ts).format( patterns[ idx ] );
+                    let fmt = moment(ts).utc().format( patterns[ idx ] );
                     return fmt;
                 };
                 
